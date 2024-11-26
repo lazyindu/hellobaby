@@ -30,20 +30,20 @@ def extract_caption_with_ytdlp(url):
             description = info.get('description', '')
             video_id = info.get('id', None)
             # Extract the formats (audio or video)
-            formats = info.get('formats', [])
-            format_type = 'Unknown'
-            print(f"formats => {formats}")
-            print(f"video id => {video_id}")
-            # Check the formats and determine if it's audio or video
-            if formats:
-                for fmt in formats:
-                    if fmt.get('vcodec') != 'none':  # Video format
-                        format_type = 'Video'
-                        break
-                    elif fmt.get('acodec') != 'none':  # Audio format
-                        format_type = 'Audio'
-                        break
-            print(f"Detected format => {format_type}")   
+            # formats = info.get('formats', [])
+            # format_type = 'Unknown'
+            # print(f"formats => {formats}")
+            # print(f"video id => {video_id}")
+            # # Check the formats and determine if it's audio or video
+            # if formats:
+            #     for fmt in formats:
+            #         if fmt.get('vcodec') != 'none':  # Video format
+            #             format_type = 'Video'
+            #             break
+            #         elif fmt.get('acodec') != 'none':  # Audio format
+            #             format_type = 'Audio'
+            #             break
+            # print(f"Detected format => {format_type}")   
             return title, description, video_id
 
     except Exception as e:
@@ -87,7 +87,7 @@ async def download_video(url, destination_folder, message, format="video"):
             'outtmpl': f'{destination_folder}/%(id)s.%(ext)s',
             'format': format_type,  # Select the format based on user input
             'restrictfilenames': True,  # Limit special characters
-            'writethumbnail': True,  #for thumbnails
+            # 'writethumbnail': True,  #for thumbnails
             # Hook to show real-time progress
             # 'progress_hooks': [lambda d: asyncio.create_task(download_progress(d, message))],
         }
@@ -132,7 +132,7 @@ async def download_from_lazy_tiktok_and_x(client, message, url):
         destination_folder = TEMP_DOWNLOAD_FOLDER  
 
         # Start the download and update the same message
-        success_download = await download_video(url, destination_folder, progress_message2, format)
+        success_download = asyncio.create_task(download_video(url, destination_folder, progress_message2, format))
         # print(f"Download success")
 
         thumb_location = f"{destination_folder}/{video_id}.jpg"
@@ -190,7 +190,7 @@ async def download_from_lazy_tiktok_and_x(client, message, url):
                     duration=duration,
                     width=width,
                     height=height,
-                    thumb=thumb,
+                    # thumb=thumb,
                     supports_streaming=True,
                     parse_mode=enums.ParseMode.HTML,
                     progress=progress_for_pyrogram,
