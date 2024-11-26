@@ -50,14 +50,14 @@ class Bot(Client):
         await self.close()
 
 # Run your bot and web server using Uvicorn
-async def main():
-    bot = Bot()
+#async def main():
+    #bot = Bot()
     # Run the bot asynchronously
-    await bot.start()
+    #bot.run()
 
-if __name__ == "__main__":
+#if __name__ == "__main__":
     # Run the bot with Uvicorn
-    uvicorn.run(main, host="0.0.0.0", port=PORT)
+  #  uvicorn.run(main, host="0.0.0.0", port=PORT)
 
 
 # ==================================================================
@@ -105,5 +105,5 @@ if __name__ == "__main__":
 #         print("Bot Stopped")
        
 
-# bot=Bot()
-# bot.run()
+bot=Bot()
+bot.run()
