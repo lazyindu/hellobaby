@@ -102,16 +102,22 @@ async def download_video(url, destination_folder, message, format="video"):
 
 async def send_video(message: Message, info_dict, video_file, destination_folder):
     basename = video_file.rsplit(".", 1)[-2]
+    print(f"basename => {basename}")
     thumbnail_url = info_dict["thumbnail"]
+    print(f"thumbnail_url => {thumbnail_url}")
     video_id = info_dict.get('id', None)
+    print(f"video_id => {video_id}")
     thumbnail_file = f"{basename}.{get_file_extension_from_url(thumbnail_url)}"
+    print(f"thumbnail_file => {thumbnail_file}")
     download_location = f"{destination_folder}/{video_id}.jpg"
+    print(f"download_location => {download_location}")
     
     thumb = download_location if os.path.isfile(download_location) else None
 
     webpage_url = info_dict["webpage_url"]
     title = info_dict["title"] or ""
     caption = f'<b><a href="{webpage_url}">{title}</a></b>'
+    print(f"caption => {caption}")
     duration = int(float(info_dict["duration"]))
     width, height = get_resolution(info_dict)
     await message.reply_video(
@@ -158,8 +164,8 @@ async def download_from_lazy_tiktok_and_x(client, message, url):
             os.makedirs(TEMP_DOWNLOAD_FOLDER)
         # Using the temporary download folder
         destination_folder = TEMP_DOWNLOAD_FOLDER  
-
-        # Start the download and update the same message
+        print(f"destination_folder => {destination_folder}")
+        # Start the do  wnload and update the same message
         # success_download = asyncio.create_task(download_video(url, destination_folder, progress_message2, format))
         # print(f"Download success")
 
@@ -237,17 +243,22 @@ async def download_from_lazy_tiktok_and_x(client, message, url):
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 # await message.reply_chat_action(enums.ChatAction.TYPING)
                 info_dict = ydl.extract_info(url, download=False)
+                print(f"info_dict => {info_dict}")
                 # download
                 # await client.send_message("**Downloading video...**")
                 ydl.process_info(info_dict)
                 # upload
                 video_file = ydl.prepare_filename(info_dict)
-                task = asyncio.create_task(send_video(message, info_dict, video_file, destination_folder))
-                while not task.done():
-                    await asyncio.sleep(3)
-                    await message.reply_chat_action(enums.ChatAction.UPLOAD_DOCUMENT)
-                await message.reply_chat_action(enums.ChatAction.CANCEL)
-                await message.delete()
+                print(f"video_file=> {video_file}")
+                try:
+                    task = asyncio.create_task(send_video(message, info_dict, video_file, destination_folder))
+                except Exception as lazy:
+                    print(f"Error in task => {lazy}")
+                # while not task.done():
+                #     await asyncio.sleep(3)
+                #     await message.reply_chat_action(enums.ChatAction.UPLOAD_DOCUMENT)
+                # await message.reply_chat_action(enums.ChatAction.CANCEL)
+                # await message.delete()
         except Exception as e:
             await client.send_message(message.chat.id, f'sᴏᴍᴇᴛʜɪɴɢ ᴡᴇɴᴛ ᴡʀᴏɴɢ...\nᴘʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ʟᴀᴛᴇʀ ᴏʀ ᴄᴏɴᴛᴀᴄᴛ ᴏᴡɴᴇʀ.')
             print(f"Error sending the file: {e}")
