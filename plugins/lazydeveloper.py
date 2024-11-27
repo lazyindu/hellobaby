@@ -96,7 +96,7 @@ async def handle_incoming_message(client: Client, message: Message):
 
         # Attach the done callback to remove the task and notify the user upon completion
         task.add_done_callback(lambda t: asyncio.create_task(task_done_callback(client, message, user_id, t)))
-        return
+        # return
 
         # while not task.done():
         #     await asyncio.sleep(3)  # Sleep for 3 seconds before sending the next action
