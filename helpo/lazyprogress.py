@@ -36,8 +36,8 @@ async def progress_for_pyrogram(current, total, ud_type, message, start):
 
         try:
             await message.edit(
-                text="{}\n\n{}".format(ud_type, tmp),
-                disable_webpage_preview=True  # Disable preview for the link
+                text="{}\n\n{}".format(ud_type, tmp)
+                # disable_webpage_preview=True  # Disable preview for the link
             )
         except:
             pass

@@ -130,7 +130,7 @@ async def send_video(client, message: Message, info_dict, video_file, destinatio
         supports_streaming=True,
         progress=progress_for_pyrogram,
         progress_args=(
-            f"<blockquote>🍟ᴜᴘʟᴏᴀᴅ ʏᴏᴜʀ ᴠɪᴅᴇᴏ... 📤</blockquote>============x============<blockquote>{caption}</blockquote>",
+            f"<blockquote>🍟ᴜᴘʟᴏᴀᴅing ʏᴏᴜʀ ᴠɪᴅᴇᴏ... 📤</blockquote>============x============<blockquote><code>{caption}</code></blockquote>",
             xlx,
             start_time,
         )
@@ -143,7 +143,7 @@ async def send_video(client, message: Message, info_dict, video_file, destinatio
 
 async def download_from_lazy_tiktok_and_x(client, message, url):
     try:
-        progress_message2 = await message.reply("<i>⚙ ᴘʀᴇᴘᴀʀɪɴɢ ᴛᴏ download...</i>")
+        progress_message2 = await message.reply("<i>⚙ ᴘʀᴇᴘᴀʀɪɴɢ\nᴀɴᴀʟʏsɪɴɢ yᴏᴜʀ ᴜʀʟ...</i>")
         
         TEMP_DOWNLOAD_FOLDER = f"./downloads/{message.from_user.id}/{time.time()}"
         if not os.path.exists(TEMP_DOWNLOAD_FOLDER):
@@ -159,7 +159,7 @@ async def download_from_lazy_tiktok_and_x(client, message, url):
         # 'http_chunk_size': 10485760,
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            progress_message3 = await progress_message2.edit_text("<i>⚡ ᴘʀᴏᴄᴇssɪɴɢ ʏᴏᴜʀ ꜰɪʟᴇ ᴛᴏ ᴜᴘʟᴏᴀᴅ ᴏɴ ᴛᴇʟᴇɢʀᴀᴍ...</i>")
+            progress_message3 = await progress_message2.edit_text("<i>⚙ fᴇᴛᴄʜɪɴɢ ʀᴇQᴜɪʀᴇᴅ dᴇᴛᴀɪʟs fʀᴏᴍ yᴏᴜʀ lɪɴᴋ...</i>")
             info_dict = ydl.extract_info(url, download=False)
             ydl.process_info(info_dict)
             # upload
