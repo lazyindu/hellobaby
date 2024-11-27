@@ -245,7 +245,7 @@ async def download_from_lazy_tiktok_and_x(client, message, url):
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 # await message.reply_chat_action(enums.ChatAction.TYPING)
                 info_dict = ydl.extract_info(url, download=False)
-                print(f"info_dict => {info_dict}")
+                # print(f"info_dict => {info_dict}")
                 # download
                 # await client.send_message("**Downloading video...**")
                 ydl.process_info(info_dict)
