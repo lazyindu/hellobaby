@@ -118,8 +118,10 @@ async def send_video(message: Message, info_dict, video_file, destination_folder
     title = info_dict["title"] or ""
     caption = f'<b><a href="{webpage_url}">{title}</a></b>'
     print(f"caption => {caption}")
-    duration = int(float(info_dict["duration"]))
-    width, height = get_resolution(info_dict)
+    # duration = int(float(info_dict["duration"]))
+    # width, height = get_resolution(info_dict)
+    width, height, duration = await Mdata01(video_file)
+    print(f"w-{width} => h-{height} => d->{duration}")
     await message.reply_video(
         video_file,
         caption=caption,
@@ -210,7 +212,7 @@ async def download_from_lazy_tiktok_and_x(client, message, url):
 
         # try:
         #     # await upload_processor(client, message, url, video_filename)
-        #     width, height, duration = await Mdata01(video_filename)
+            # width, height, duration = await Mdata01(video_filename)
        
         #     await client.send_chat_action(message.chat.id, enums.ChatAction.UPLOAD_VIDEO)
         #     # print("Download complete. Sending now...")
