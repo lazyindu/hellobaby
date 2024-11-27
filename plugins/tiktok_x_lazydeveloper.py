@@ -149,12 +149,11 @@ async def download_from_lazy_tiktok_and_x(client, message, url):
         destination_folder = TEMP_DOWNLOAD_FOLDER  
         # try:
         ydl_opts = {
-        "cookies": "./cookies.txt",
         "format": "best[ext=mp4]",
         'outtmpl': f'{destination_folder}/%(id)s.%(ext)s',
         "writethumbnail": True,
         'socket_timeout': 60,  # Increase the timeout to 60 seconds
-        'http_chunk_size': 10485760,
+        # 'http_chunk_size': 10485760,
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             progress_message3 = await progress_message2.edit_text("<i>⚡ ᴘʀᴏᴄᴇssɪɴɢ ʏᴏᴜʀ ꜰɪʟᴇ ᴛᴏ ᴜᴘʟᴏᴀᴅ ᴏɴ ᴛᴇʟᴇɢʀᴀᴍ...</i>")

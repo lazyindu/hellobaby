@@ -12,6 +12,7 @@ from plugins.youtube_downloader_lazydeveloper import youtube_and_other_download_
 from pyrogram import Client, filters
 from pyrogram.types import Message
 import re
+from pyrogram import enums
 
 @Client.on_message(filters.private & filters.command(["spdl"]))
 async def handle_seperate_download(client: Client, message: Message):
@@ -35,14 +36,26 @@ async def handle_seperate_download(client: Client, message: Message):
     await youtube_and_other_download_lazy(client, message, url)
     await ok.edit_text("Thank you for using me ❤")
 
+user_tasks = {}
+
+
 @Client.on_message(filters.private & filters.text & ~filters.command(['start','users','broadcast']))
 async def handle_incoming_message(client: Client, message: Message):
     try:
         user_id = message.from_user.id  # Get user ID dynamically
 
+        # Extract the message text and user ID
         if user_id not in ADMIN:
             await client.send_message(chat_id=message.chat.id, text=f"Sorry Sweetheart! cant talk to you \nTake permission from my Lover @LazyDeveloperr")
-        # Extract the message text and user ID
+        # Initialize task list for the user if not already present
+        if user_id not in user_tasks:
+            user_tasks[user_id] = []
+
+        # Check if the user already has 3 active tasks
+        if len(user_tasks[user_id]) >= 2:
+            await message.reply("⏳ You already have 2 active downloads. Please wait for one to finish before adding more.")
+            return
+
         url = message.text.strip()
         ok = await message.reply("🔄 ᴅᴇᴛᴇᴄᴛɪɴɢ ᴜʀʟ ᴛʏᴘᴇ ᴀɴᴅ ᴘʀᴏᴄᴇssɪɴɢ ᴛʜᴇ ᴅᴏᴡɴʟᴏᴀᴅ...")
 
@@ -58,12 +71,40 @@ async def handle_incoming_message(client: Client, message: Message):
             # "youtube.com": download_from_youtube,
             # "youtu.be": download_from_youtube
         }
+
         for platform, handler in PLATFORM_HANDLERS.items():
             if platform in url:
-                lazydev = await ok.edit_text(f"Detected {platform} ᴜʀʟ!")
+                lazydev = await ok.edit_text(f"Detected {platform} URL!")
                 await lazydev.delete()
-                await handler(client, message, url)
-                return
+                # Create a task for the handler function
+                task = asyncio.create_task(handler(client, message, url))
+                # Create a task and add it to the user's task list
+                task = asyncio.create_task(handler(client, message, url))
+                user_tasks[user_id].append(task)
+                
+                while not task.done():
+                    await asyncio.sleep(3)  # Sleep for 3 seconds before sending the next action
+                    await message.reply_chat_action(enums.ChatAction.UPLOAD_DOCUMENT)  # Show the 'upload document' action
+
+                # When the task finishes, remove it from the user's task list
+                # task.add_done_callback(lambda t: user_tasks[user_id].remove(t))                
+                def task_done_callback(t):
+                    user_tasks[user_id].remove(t)  # Remove the task from the user's task list
+                    asyncio.create_task(client.send_message(
+                        chat_id=message.chat.id,
+                        text="✅ Your task is completed. You can send a new URL now!"
+                    ))
+
+                task.add_done_callback(task_done_callback)
+                    
+                return #await task  # Wait for the task to finish before proceeding
+
+        # for platform, handler in PLATFORM_HANDLERS.items():
+        #     if platform in url:
+        #         lazydev = await ok.edit_text(f"Detected {platform} ᴜʀʟ!")
+        #         await lazydev.delete()
+        #         await handler(client, message, url)
+        #         return
 
     except Exception as e:
         # Handle any errors
