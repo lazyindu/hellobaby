@@ -172,8 +172,8 @@ async def download_from_lazy_tiktok_and_x(client, message, url):
         #     return
 
         # Get the name of the downloaded file
-        video_filename = max([os.path.join(destination_folder, f) for f in os.listdir(
-            destination_folder)], key=os.path.getctime)
+        # video_filename = max([os.path.join(destination_folder, f) for f in os.listdir(
+        #     destination_folder)], key=os.path.getctime)
         # print(f"video filename:{video_filename}")
 
         # Check the file size
@@ -253,8 +253,8 @@ async def download_from_lazy_tiktok_and_x(client, message, url):
             print(f"Error sending the file: {e}")
         finally:
             # Delete the downloaded file (optional)
-            if os.path.exists(video_filename):
-                os.remove(video_filename)
+            # if os.path.exists(video_filename):
+            #     os.remove(video_filename)
             # if os.path.exists(thumb):
             #     os.remove(thumb)
                 print("thumbnail removed success")
