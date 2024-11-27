@@ -100,29 +100,26 @@ async def download_video(url, destination_folder, message, format="video"):
         print(f"Error during download: {e}")
         return False
 
-async def send_video(message: Message, info_dict, video_file, destination_folder):
+async def send_video(client, message: Message, info_dict, video_file, destination_folder, progress_message3):
     basename = video_file.rsplit(".", 1)[-2]
-    print(f"basename => {basename}")
     thumbnail_url = info_dict["thumbnail"]
-    print(f"thumbnail_url => {thumbnail_url}")
     video_id = info_dict.get('id', None)
-    print(f"video_id => {video_id}")
     thumbnail_file = f"{basename}.{get_file_extension_from_url(thumbnail_url)}"
-    print(f"thumbnail_file => {thumbnail_file}")
     download_location = f"{destination_folder}/{video_id}.jpg"
-    print(f"download_location => {download_location}")
-    
+     
     thumb = download_location if os.path.isfile(download_location) else None
 
     webpage_url = info_dict["webpage_url"]
     title = info_dict["title"] or ""
-    caption = f'<b><a href="{webpage_url}">{title}</a></b>'
-    print(f"caption => {caption}")
-    # duration = int(float(info_dict["duration"]))
-    # width, height = get_resolution(info_dict)
+    bot_username = client.username if client.username else TEL_USERNAME
+    caption_lazy = f"\n\nᴡɪᴛʜ ❤ @{bot_username}"
+    caption = f'<b><a href="{webpage_url}">{title}</a> <blockquote>{caption_lazy}</blockquote></b>'
     width, height, duration = await Mdata01(video_file)
-    print(f"w-{width} => h-{height} => d->{duration}")
-    await message.reply_video(
+    await progress_message3.edit_text("⚡ ᴘʀᴏᴄᴇssɪɴɢ ʏᴏᴜʀ ꜰɪʟᴇ ᴛᴏ ᴜᴘʟᴏᴀᴅ ᴏɴ ᴛᴇʟᴇɢʀᴀᴍ...")
+    start_time = time.time()
+    print(f"Uploading to telegram => {video_file}")
+    await client.send_video(
+        message.chat.id,
         video_file,
         caption=caption,
         duration=duration,
@@ -130,18 +127,64 @@ async def send_video(message: Message, info_dict, video_file, destination_folder
         height=height,
         parse_mode=enums.ParseMode.HTML,
         thumb=thumb,
+        progress=progress_for_pyrogram,
+        progress_args=(
+            f"<blockquote>🍟ᴜᴘʟᴏᴀᴅ ʏᴏᴜʀ ᴠɪᴅᴇᴏ... 📤</blockquote>============x============<blockquote>{caption}</blockquote>",
+            progress_message3,
+            start_time,
+        )
     )
-
     os.remove(video_file)
     os.remove(thumbnail_file)
 
 
 async def download_from_lazy_tiktok_and_x(client, message, url):
     try:
-        bot_username = client.username if client.username else TEL_USERNAME
-        caption_lazy = f"\n\nᴡɪᴛʜ ❤ @{bot_username}"
-        
         progress_message2 = await message.reply("<i>⚙ ᴘʀᴇᴘᴀʀɪɴɢ ᴛᴏ download...</i>")
+        
+        TEMP_DOWNLOAD_FOLDER = f"./downloads/{message.from_user.id}/{time.time()}"
+        if not os.path.exists(TEMP_DOWNLOAD_FOLDER):
+            os.makedirs(TEMP_DOWNLOAD_FOLDER)
+        # Using the temporary download folder
+        destination_folder = TEMP_DOWNLOAD_FOLDER  
+        # try:
+        ydl_opts = {
+        "cookies": "./cookies.txt",
+        "format": "best[ext=mp4]",
+        'outtmpl': f'{destination_folder}/%(id)s.%(ext)s',
+        "writethumbnail": True,
+        'socket_timeout': 60,  # Increase the timeout to 60 seconds
+        'http_chunk_size': 10485760,
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            progress_message3 = await progress_message2.edit_text("<i>⚡ ᴘʀᴏᴄᴇssɪɴɢ ʏᴏᴜʀ ꜰɪʟᴇ ᴛᴏ ᴜᴘʟᴏᴀᴅ ᴏɴ ᴛᴇʟᴇɢʀᴀᴍ...</i>")
+            info_dict = ydl.extract_info(url, download=False)
+            ydl.process_info(info_dict)
+            # upload
+            video_file = ydl.prepare_filename(info_dict)
+            try:
+                print(f"processing vide0 send => {video_file}")
+                await send_video(client, message, info_dict, video_file, destination_folder, progress_message3)
+            except Exception as lazy:
+                print(f"Error in task => {lazy}")
+            
+            #================= after work done ==============
+            lazydeveloper = await client.send_message(chat_id=message.chat.id, text=f"❤ ꜰᴇᴇʟ ꜰʀᴇᴇ ᴛᴏ sʜᴀʀᴇ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ꜰʀɪᴇɴᴅ ᴄɪʀᴄʟᴇ...")
+            await asyncio.sleep(100)
+            await lazydeveloper.delete()
+    except Exception as e:
+        await client.send_message(message.chat.id, f"sᴏᴍᴇᴛʜɪɴɢ ᴡᴇɴᴛ ᴡʀᴏɴɢ...\nᴘʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ʟᴀᴛᴇʀ ᴏʀ ᴄᴏɴᴛᴀᴄᴛ ᴏᴡɴᴇʀ.")
+        print(f"❌ An unexpected error occurred: {e}")
+
+        
+        
+        
+        
+        
+        
+# =========================================metod-2-slow-method================================        
+        
+        
         # await asyncio.sleep(1)
         
         # await client.send_chat_action(message.chat.id, enums.ChatAction.TYPING)
@@ -160,13 +203,13 @@ async def download_from_lazy_tiktok_and_x(client, message, url):
         # new_caption = new_caption + caption_lazy  # Add bot username at the end
         # Initialize media list
     
-        format = "video"
-        TEMP_DOWNLOAD_FOLDER = f"./downloads/{message.from_user.id}/{time.time()}"
-        if not os.path.exists(TEMP_DOWNLOAD_FOLDER):
-            os.makedirs(TEMP_DOWNLOAD_FOLDER)
-        # Using the temporary download folder
-        destination_folder = TEMP_DOWNLOAD_FOLDER  
-        print(f"destination_folder => {destination_folder}")
+        # format = "video"
+        # TEMP_DOWNLOAD_FOLDER = f"./downloads/{message.from_user.id}/{time.time()}"
+        # if not os.path.exists(TEMP_DOWNLOAD_FOLDER):
+        #     os.makedirs(TEMP_DOWNLOAD_FOLDER)
+        # # Using the temporary download folder
+        # destination_folder = TEMP_DOWNLOAD_FOLDER  
+        # print(f"destination_folder => {destination_folder}")
         # Start the do  wnload and update the same message
         # success_download = asyncio.create_task(download_video(url, destination_folder, progress_message2, format))
         # print(f"Download success")
@@ -206,7 +249,7 @@ async def download_from_lazy_tiktok_and_x(client, message, url):
         #     video_filename = output_filename
 
         # Send the video/audio file to the user
-        progress_message3 = await progress_message2.edit_text("<i>⚡ ᴘʀᴏᴄᴇssɪɴɢ ʏᴏᴜʀ ꜰɪʟᴇ ᴛᴏ ᴜᴘʟᴏᴀᴅ ᴏɴ ᴛᴇʟᴇɢʀᴀᴍ...</i>")
+        # progress_message3 = await progress_message2.edit_text("<i>⚡ ᴘʀᴏᴄᴇssɪɴɢ ʏᴏᴜʀ ꜰɪʟᴇ ᴛᴏ ᴜᴘʟᴏᴀᴅ ᴏɴ ᴛᴇʟᴇɢʀᴀᴍ...</i>")
         # await asyncio.sleep(1)
         
 
@@ -235,47 +278,36 @@ async def download_from_lazy_tiktok_and_x(client, message, url):
         #                 progress_message3,
         #                 start_time,
         #             ))
-        try:
-            ydl_opts = {
-            "cookies": "./cookies.txt",
-            "format": "best[ext=mp4]",
-            'outtmpl': f'{destination_folder}/%(id)s.%(ext)s',
-            "writethumbnail": True,
-            }
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                # await message.reply_chat_action(enums.ChatAction.TYPING)
-                info_dict = ydl.extract_info(url, download=False)
-                # print(f"info_dict => {info_dict}")
-                # download
-                # await client.send_message("**Downloading video...**")
-                ydl.process_info(info_dict)
-                # upload
-                video_file = ydl.prepare_filename(info_dict)
-                print(f"video_file=> {video_file}")
-                try:
-                    task = asyncio.create_task(send_video(message, info_dict, video_file, destination_folder))
-                except Exception as lazy:
-                    print(f"Error in task => {lazy}")
-                # while not task.done():
-                #     await asyncio.sleep(3)
-                #     await message.reply_chat_action(enums.ChatAction.UPLOAD_DOCUMENT)
-                # await message.reply_chat_action(enums.ChatAction.CANCEL)
-                # await message.delete()
-        except Exception as e:
-            await client.send_message(message.chat.id, f'sᴏᴍᴇᴛʜɪɴɢ ᴡᴇɴᴛ ᴡʀᴏɴɢ...\nᴘʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ʟᴀᴛᴇʀ ᴏʀ ᴄᴏɴᴛᴀᴄᴛ ᴏᴡɴᴇʀ.')
-            print(f"Error sending the file: {e}")
-        finally:
-            # Delete the downloaded file (optional)
-            # if os.path.exists(video_filename):
-            #     os.remove(video_filename)
-            # if os.path.exists(thumb):
-            #     os.remove(thumb)
-            print("thumbnail removed success")
-
-        await progress_message3.delete()
-        lazydeveloper = await client.send_message(chat_id=message.chat.id, text=f"❤ ꜰᴇᴇʟ ꜰʀᴇᴇ ᴛᴏ sʜᴀʀᴇ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ꜰʀɪᴇɴᴅ ᴄɪʀᴄʟᴇ...")
-        await asyncio.sleep(100)
-        await lazydeveloper.delete()
-    except Exception as e:
-        await client.send_message(message.chat.id, f"sᴏᴍᴇᴛʜɪɴɢ ᴡᴇɴᴛ ᴡʀᴏɴɢ...\nᴘʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ʟᴀᴛᴇʀ ᴏʀ ᴄᴏɴᴛᴀᴄᴛ ᴏᴡɴᴇʀ.")
-        print(f"❌ An unexpected error occurred: {e}")
+    
+    # ----------------------------method 3-----------------
+    #     try:
+    #         ydl_opts = {
+    #         "cookies": "./cookies.txt",
+    #         "format": "best[ext=mp4]",
+    #         'outtmpl': f'{destination_folder}/%(id)s.%(ext)s',
+    #         "writethumbnail": True,
+    #         'socket_timeout': 60,  # Increase the timeout to 60 seconds
+    #         'http_chunk_size': 10485760,
+    #         }
+    #         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+    #             progress_message3 = await progress_message2.edit_text("<i>⚡ ᴘʀᴏᴄᴇssɪɴɢ ʏᴏᴜʀ ꜰɪʟᴇ ᴛᴏ ᴜᴘʟᴏᴀᴅ ᴏɴ ᴛᴇʟᴇɢʀᴀᴍ...</i>")
+    #             info_dict = ydl.extract_info(url, download=False)
+    #             ydl.process_info(info_dict)
+    #             # upload
+    #             video_file = ydl.prepare_filename(info_dict)
+    #             print(f"video_file=> {video_file}")
+    #             try:
+    #                 await send_video(message, info_dict, video_file, destination_folder, progress_message3)
+    #             except Exception as lazy:
+    #                 print(f"Error in task => {lazy}")
+                
+    #     except Exception as e:
+    #         await client.send_message(message.chat.id, f'sᴏᴍᴇᴛʜɪɴɢ ᴡᴇɴᴛ ᴡʀᴏɴɢ...\nᴘʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ʟᴀᴛᴇʀ ᴏʀ ᴄᴏɴᴛᴀᴄᴛ ᴏᴡɴᴇʀ.')
+    #         print(f"Error sending the file: {e}")
+    #     finally:
+    #         lazydeveloper = await client.send_message(chat_id=message.chat.id, text=f"❤ ꜰᴇᴇʟ ꜰʀᴇᴇ ᴛᴏ sʜᴀʀᴇ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ꜰʀɪᴇɴᴅ ᴄɪʀᴄʟᴇ...")
+    #         await asyncio.sleep(100)
+    #         await lazydeveloper.delete()
+    # except Exception as e:
+    #     await client.send_message(message.chat.id, f"sᴏᴍᴇᴛʜɪɴɢ ᴡᴇɴᴛ ᴡʀᴏɴɢ...\nᴘʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ʟᴀᴛᴇʀ ᴏʀ ᴄᴏɴᴛᴀᴄᴛ ᴏᴡɴᴇʀ.")
+    #     print(f"❌ An unexpected error occurred: {e}")

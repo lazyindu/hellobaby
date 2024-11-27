@@ -21,7 +21,6 @@ logging.getLogger("pyrogram").setLevel(logging.WARNING)
 
 async def youtube_and_other_download_lazy(bot, update, url):
     logger.info(update.from_user)
-    # url = update.text
     youtube_dl_username = None
     youtube_dl_password = None
     file_name = None

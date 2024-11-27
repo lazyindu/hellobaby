@@ -102,7 +102,14 @@ async def send_video(message: Message, info_dict, video_file):
 async def callback_query_ytdl_video(_, callback_query):
     try:
         # url = callback_query.message.text
-        url = callback_query.message.reply_to_message.text
+        # url = callback_query.message.reply_to_message.text
+        message = callback_query.message
+        command_parts = message.text.split(maxsplit=1)  # Split the message into command and arguments
+        if len(command_parts) < 2:
+            await message.reply("⚠️ Please provide a valid URL after the command. Example: `/spdl <url>`")
+            return
+        
+        url = command_parts[1].strip()
         ydl_opts = {
             "cookies": "./cookies.txt",
             "format": "best[ext=mp4]",
@@ -110,7 +117,7 @@ async def callback_query_ytdl_video(_, callback_query):
             "writethumbnail": True,
         }
         with YoutubeDL(ydl_opts) as ydl:
-            message = callback_query.message
+            # message = callback_query.message
             await message.reply_chat_action(enums.ChatAction.TYPING)
             info_dict = ydl.extract_info(url, download=False)
             # download

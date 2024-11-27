@@ -8,7 +8,7 @@ from route import web_server
 
 from pyrogram import Client 
 from config import API_ID, API_HASH, BOT_TOKEN, LOGGER, PORT
-import uvicorn
+# import uvicorn
 
 # Define your Bot class
 class Bot(Client):
@@ -19,10 +19,10 @@ class Bot(Client):
             api_id=API_ID,
             api_hash=API_HASH,
             bot_token=BOT_TOKEN,
-            workers=200,
+            workers=20,
             plugins=dict(root="plugins"),
             sleep_threshold=15,
-            max_concurrent_transmissions=5,
+            max_concurrent_transmissions=10,
         )
         self.LOGGER = LOGGER
     
@@ -49,15 +49,8 @@ class Bot(Client):
         print("Bot Stopped")
         await self.close()
 
-# Run your bot and web server using Uvicorn
-# async def main():
-#     bot = Bot()
-#     # Run the bot asynchronously
-#     await bot.start()
-
-# if __name__ == "__main__":
-#     # Run the bot with Uvicorn
-#     uvicorn.run(main, host="0.0.0.0", port=PORT)
+bot=Bot()
+bot.run()
 
 
 # ==================================================================
@@ -104,6 +97,13 @@ class Bot(Client):
 #         await super().stop()      
 #         print("Bot Stopped")
        
+# Run your bot and web server using Uvicorn ##credit is everything for lazydeveloperr
+# async def main():
+#     bot = Bot()
+#     # Run the bot asynchronously
+#     await bot.start()
 
-bot=Bot()
-bot.run()
+# if __name__ == "__main__":
+#     # Run the bot with Uvicorn
+#     uvicorn.run(main, host="0.0.0.0", port=PORT)
+
