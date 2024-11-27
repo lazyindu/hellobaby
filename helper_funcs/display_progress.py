@@ -1,13 +1,30 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# (c) Thank you LazyDeveloperr for helping us in this journey.
+
+# the logging things
+import logging
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 import math
-import time 
-from helpo.txt import mr
-from pyrogram.errors import UserNotParticipant
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from pyrogram import enums
+import os
+import time
+
+# the secret configuration specific things
+from config import *
+# the Strings used for this "thing"
+# from script import Script as Translation
 
 
-async def progress_for_pyrogram(current, total, ud_type, message, start):
-    print(f"preogressfunction called ")
+async def progress_for_pyrogram(
+    current,
+    total,
+    ud_type,
+    message,
+    start
+):
     now = time.time()
     diff = now - start
     if round(diff % 10.00) == 0 or current == total:
@@ -21,25 +38,28 @@ async def progress_for_pyrogram(current, total, ud_type, message, start):
         elapsed_time = TimeFormatter(milliseconds=elapsed_time)
         estimated_total_time = TimeFormatter(milliseconds=estimated_total_time)
 
-        progress = "{0}{1}".format(
+        progress = "[{0}{1}] \nP: {2}%\n".format(
             ''.join(["█" for i in range(math.floor(percentage / 5))]),
-            ''.join(["░" for i in range(20 - math.floor(percentage / 5))]))
+            ''.join(["░" for i in range(20 - math.floor(percentage / 5))]),
+            round(percentage, 2))
 
-        tmp = progress + mr.PROGRESS_BAR.format( 
-            round(percentage, 2),
+        tmp = progress + "{0} of {1}\nSpeed: {2}/s\nETA: {3}\n".format(
             humanbytes(current),
             humanbytes(total),
             humanbytes(speed),
             # elapsed_time if elapsed_time != '' else "0 s",
             estimated_total_time if estimated_total_time != '' else "0 s"
         )
-
         try:
             await message.edit(
-                text="{}\n\n{}".format(ud_type, tmp)
+                text="{}\n {}".format(
+                    ud_type,
+                    tmp
+                )
             )
         except:
             pass
+
 
 def humanbytes(size):
     # https://stackoverflow.com/a/49361727/4723940
@@ -48,11 +68,12 @@ def humanbytes(size):
         return ""
     power = 2**10
     n = 0
-    Dic_powerN = {0: ' ', 1: 'K', 2: 'M', 3: 'G', 4: 'T'}
+    Dic_powerN = {0: ' ', 1: 'Ki', 2: 'Mi', 3: 'Gi', 4: 'Ti'}
     while size > power:
         size /= power
         n += 1
     return str(round(size, 2)) + " " + Dic_powerN[n] + 'B'
+
 
 def TimeFormatter(milliseconds: int) -> str:
     seconds, milliseconds = divmod(int(milliseconds), 1000)
@@ -64,13 +85,4 @@ def TimeFormatter(milliseconds: int) -> str:
         ((str(minutes) + "m, ") if minutes else "") + \
         ((str(seconds) + "s, ") if seconds else "") + \
         ((str(milliseconds) + "ms, ") if milliseconds else "")
-    return tmp[:-2] 
-
-def convert(seconds):
-    seconds = seconds % (24 * 3600)
-    hour = seconds // 3600
-    seconds %= 3600
-    minutes = seconds // 60
-    seconds %= 60      
-    return "%d:%02d:%02d" % (hour, minutes, seconds)
-
+    return tmp[:-2]
