@@ -238,7 +238,7 @@ async def download_from_lazy_tiktok_and_x(client, message, url):
                 # await message.reply_chat_action(enums.ChatAction.TYPING)
                 info_dict = ydl.extract_info(url, download=False)
                 # download
-                await client.send_message("**Downloading video...**")
+                # await client.send_message("**Downloading video...**")
                 ydl.process_info(info_dict)
                 # upload
                 video_file = ydl.prepare_filename(info_dict)
@@ -257,7 +257,7 @@ async def download_from_lazy_tiktok_and_x(client, message, url):
             #     os.remove(video_filename)
             # if os.path.exists(thumb):
             #     os.remove(thumb)
-                print("thumbnail removed success")
+            print("thumbnail removed success")
 
         await progress_message3.delete()
         lazydeveloper = await client.send_message(chat_id=message.chat.id, text=f"❤ ꜰᴇᴇʟ ꜰʀᴇᴇ ᴛᴏ sʜᴀʀᴇ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ꜰʀɪᴇɴᴅ ᴄɪʀᴄʟᴇ...")
