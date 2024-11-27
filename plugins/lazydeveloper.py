@@ -36,22 +36,24 @@ async def handle_incoming_message(client: Client, message: Message):
         url = message.text.strip()
 
         task = asyncio.create_task(lazydeveloper_handle_url(client, message, url, user_id))
-            
-        user_tasks[user_id].append(task)
-        
-        try:
-            while not task.done():  # Keep checking until the task is done
-                await asyncio.sleep(3)  # Small delay to avoid tight looping
-                
-            # Call the task completion logic once the task is fully done
-            await task_done_callback(client, message, user_id, task)
+        print(f"Task created successfully => {task}")
 
-        except Exception as e:
-            print(f"Error in monitor_task_completion: {e}")
+        if task.done():
+            print(f"Task completed")
+        
+        
+        # try:
+        #     while not task.done():  # Keep checking until the task is done
+        #         await asyncio.sleep(3)  # Small delay to avoid tight looping
+                
+        #     # Call the task completion logic once the task is fully done
+        #     await task_done_callback(client, message, user_id, task)
+
+        # except Exception as e:
+        #     print(f"Error in monitor_task_completion: {e}")
         # task.add_done_callback(lambda t: asyncio.create_task(task_done_callback(client, message, user_id, t)))
     except Exception as lazyerror:
         print(f"error => {lazyerror}")
-
 
 async def lazydeveloper_handle_url(client, message, url, user_id):
     try:
@@ -75,12 +77,33 @@ async def lazydeveloper_handle_url(client, message, url, user_id):
                 lazydev = await ok.edit_text(f"Detected {platform} URL!")
                 await lazydev.delete()
                 # Create a task for the handler function
-                task = asyncio.create_task(handler(client, message, url))
+                lazytask = asyncio.create_task(handler(client, message, url))
+                user_tasks[user_id].append(lazytask)
+                lazytask.add_done_callback(lambda t: asyncio.create_task(task_done_callback(client, message, user_id, t)))
+                if lazytask.done():
+                    print(f"lazy task completed => {lazytask}")
                 return
     except Exception as e:
         # Handle any errors
         await message.reply(f"❌ An error occurred: {e}")
 
+async def task_done_callback(client, message, user_id, t):
+    try:
+        if user_id in user_tasks and t in user_tasks[user_id]:
+            user_tasks[user_id].remove(t)
+
+
+        # Notify the user
+        workdonemsg = await client.send_message(
+            chat_id=message.chat.id,
+            text="✅ Your task is completed. You can send a new URL now!"
+        )
+        await asyncio.sleep(300)
+        await workdonemsg.delete()
+    except KeyError:
+        print(f"Task or user ID not found during task cleanup: {t}")
+    except Exception as e:
+        print(f"Error in task_done_callback: {e}")
 
 @Client.on_message(filters.private & filters.command(["spdl"]))
 async def handle_seperate_download(client: Client, message: Message):
@@ -103,24 +126,6 @@ async def handle_seperate_download(client: Client, message: Message):
     # Call your download function
     await youtube_and_other_download_lazy(client, message, url)
     await ok.edit_text("Thank you for using me ❤")
-
-async def task_done_callback(client, message, user_id, t):
-    try:
-        if user_id in user_tasks and t in user_tasks[user_id]:
-            user_tasks[user_id].remove(t)
-
-
-        # Notify the user
-        workdonemsg = await client.send_message(
-            chat_id=message.chat.id,
-            text="✅ Your task is completed. You can send a new URL now!"
-        )
-        await asyncio.sleep(300)
-        await workdonemsg.delete()
-    except KeyError:
-        print(f"Task or user ID not found during task cleanup: {t}")
-    except Exception as e:
-        print(f"Error in task_done_callback: {e}")
 
 
 # ============================================================================
