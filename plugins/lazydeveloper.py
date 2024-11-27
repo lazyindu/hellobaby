@@ -43,20 +43,31 @@ user_tasks = {}
 async def handle_incoming_message(client: Client, message: Message):
     try:
         user_id = message.from_user.id  # Get user ID dynamically
-
         # Extract the message text and user ID
         if user_id not in ADMIN:
             await client.send_message(chat_id=message.chat.id, text=f"Sorry Sweetheart! cant talk to you \nTake permission from my Lover @LazyDeveloperr")
+        
         # Initialize task list for the user if not already present
         if user_id not in user_tasks:
             user_tasks[user_id] = []
 
         # Check if the user already has 3 active tasks
-        if len(user_tasks[user_id]) >= 1:
+        if len(user_tasks[user_id]) >= 2:
             await message.reply("⏳ You already have 2 active downloads. Please wait for one to finish before adding more.")
             return
-
+        
         url = message.text.strip()
+        task = asyncio.create_task(lazydeveloper_handle_url(client, message, url, user_id))
+        
+        user_tasks[user_id].append(task)
+        task.add_done_callback(lambda t: user_tasks[user_id].remove(t))
+
+    except Exception as lazyerror:
+        print(lazyerror)
+
+
+async def lazydeveloper_handle_url(client, message, url, user_id):
+    try:
         ok = await message.reply("🔄 ᴅᴇᴛᴇᴄᴛɪɴɢ ᴜʀʟ ᴛʏᴘᴇ ᴀɴᴅ ᴘʀᴏᴄᴇssɪɴɢ ᴛʜᴇ ᴅᴏᴡɴʟᴏᴀᴅ...")
 
         # Check if the URL contains 'instagram.com'
@@ -79,7 +90,7 @@ async def handle_incoming_message(client: Client, message: Message):
                 # Create a task for the handler function
                 task = asyncio.create_task(handler(client, message, url))
                 # Create a task and add it to the user's task list
-                user_tasks[user_id].append(task)
+                # user_tasks[user_id].append(task)
                 
                 # while not task.done():
                 #     await asyncio.sleep(3)  # Sleep for 3 seconds before sending the next action
@@ -87,16 +98,16 @@ async def handle_incoming_message(client: Client, message: Message):
 
                 # When the task finishes, remove it from the user's task list
                 # task.add_done_callback(lambda t: user_tasks[user_id].remove(t))                
-                async def task_done_callback(t):
-                    user_tasks[user_id].remove(t)  # Remove the task from the user's task list
-                    workdonemsg = asyncio.create_task(client.send_message(
-                        chat_id=message.chat.id,
-                        text="✅ Your task is completed. You can send a new URL now!"
-                    ))
-                    await asyncio.sleep(300)
-                    await workdonemsg.delete()
+                # async def task_done_callback(t):
+                #     user_tasks[user_id].remove(t)  # Remove the task from the user's task list
+                #     workdonemsg = asyncio.create_task(client.send_message(
+                #         chat_id=message.chat.id,
+                #         text="✅ Your task is completed. You can send a new URL now!"
+                #     ))
+                #     await asyncio.sleep(300)
+                #     await workdonemsg.delete()
 
-                task.add_done_callback(task_done_callback)
+                # task.add_done_callback(lambda t: user_tasks[user_id].remove(t))
                 
                 return #await task  # Wait for the task to finish before proceeding
 
