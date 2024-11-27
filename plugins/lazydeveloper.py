@@ -79,7 +79,6 @@ async def handle_incoming_message(client: Client, message: Message):
                 # Create a task for the handler function
                 task = asyncio.create_task(handler(client, message, url))
                 # Create a task and add it to the user's task list
-                task = asyncio.create_task(handler(client, message, url))
                 user_tasks[user_id].append(task)
                 
                 while not task.done():

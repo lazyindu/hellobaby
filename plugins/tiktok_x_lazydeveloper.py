@@ -112,8 +112,8 @@ async def send_video(client, message: Message, info_dict, video_file, destinatio
     webpage_url = info_dict["webpage_url"]
     title = info_dict["title"] or ""
     bot_username = client.username if client.username else TEL_USERNAME
-    caption_lazy = f"\n\nᴡɪᴛʜ ❤ @{bot_username}"
-    caption = f'<b><a href="{webpage_url}">{title}</a> <blockquote>{caption_lazy}</blockquote></b>'
+    caption_lazy = f"ᴡɪᴛʜ ❤ @{bot_username}"
+    caption = f'<b><a href="{webpage_url}">{title}</a>\n<blockquote>{caption_lazy}</blockquote></b>'
     width, height, duration = await Mdata01(video_file)
     await progress_message3.edit_text("⚡ ᴘʀᴏᴄᴇssɪɴɢ ʏᴏᴜʀ ꜰɪʟᴇ ᴛᴏ ᴜᴘʟᴏᴀᴅ ᴏɴ ᴛᴇʟᴇɢʀᴀᴍ...")
     start_time = time.time()
@@ -126,6 +126,7 @@ async def send_video(client, message: Message, info_dict, video_file, destinatio
         width=width,
         height=height,
         parse_mode=enums.ParseMode.HTML,
+        disable_webpage_preview=True,  # Disable preview for the link
         thumb=thumb,
         progress=progress_for_pyrogram,
         progress_args=(
@@ -134,8 +135,10 @@ async def send_video(client, message: Message, info_dict, video_file, destinatio
             start_time,
         )
     )
-    os.remove(video_file)
-    os.remove(thumbnail_file)
+    if os.path.exists(video_file):
+        os.remove(video_file)
+    if os.path.exists(thumbnail_file):
+        os.remove(thumbnail_file)
 
 
 async def download_from_lazy_tiktok_and_x(client, message, url):
