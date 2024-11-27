@@ -115,7 +115,7 @@ async def send_video(client, message: Message, info_dict, video_file, destinatio
     caption_lazy = f"ᴡɪᴛʜ ❤ @{bot_username}"
     caption = f'<b><a href="{webpage_url}">{title}</a>\n<blockquote>{caption_lazy}</blockquote></b>'
     width, height, duration = await Mdata01(video_file)
-    await progress_message3.edit_text("⚡ ᴘʀᴏᴄᴇssɪɴɢ ʏᴏᴜʀ ꜰɪʟᴇ ᴛᴏ ᴜᴘʟᴏᴀᴅ ᴏɴ ᴛᴇʟᴇɢʀᴀᴍ...")
+    xlx = await progress_message3.edit_text("⚡ ᴘʀᴏᴄᴇssɪɴɢ ʏᴏᴜʀ ꜰɪʟᴇ ᴛᴏ ᴜᴘʟᴏᴀᴅ ᴏɴ ᴛᴇʟᴇɢʀᴀᴍ...")
     start_time = time.time()
     print(f"Uploading to telegram => {video_file}")
     await client.send_video(
@@ -131,7 +131,7 @@ async def send_video(client, message: Message, info_dict, video_file, destinatio
         progress=progress_for_pyrogram,
         progress_args=(
             f"<blockquote>🍟ᴜᴘʟᴏᴀᴅ ʏᴏᴜʀ ᴠɪᴅᴇᴏ... 📤</blockquote>============x============<blockquote>{caption}</blockquote>",
-            progress_message3,
+            xlx,
             start_time,
         )
     )

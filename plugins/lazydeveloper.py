@@ -52,7 +52,7 @@ async def handle_incoming_message(client: Client, message: Message):
             user_tasks[user_id] = []
 
         # Check if the user already has 3 active tasks
-        if len(user_tasks[user_id]) >= 2:
+        if len(user_tasks[user_id]) >= 1:
             await message.reply("⏳ You already have 2 active downloads. Please wait for one to finish before adding more.")
             return
 
@@ -81,21 +81,23 @@ async def handle_incoming_message(client: Client, message: Message):
                 # Create a task and add it to the user's task list
                 user_tasks[user_id].append(task)
                 
-                while not task.done():
-                    await asyncio.sleep(3)  # Sleep for 3 seconds before sending the next action
-                    await message.reply_chat_action(enums.ChatAction.UPLOAD_DOCUMENT)  # Show the 'upload document' action
+                # while not task.done():
+                #     await asyncio.sleep(3)  # Sleep for 3 seconds before sending the next action
+                #     await message.reply_chat_action(enums.ChatAction.UPLOAD_DOCUMENT)  # Show the 'upload document' action
 
                 # When the task finishes, remove it from the user's task list
                 # task.add_done_callback(lambda t: user_tasks[user_id].remove(t))                
-                def task_done_callback(t):
+                async def task_done_callback(t):
                     user_tasks[user_id].remove(t)  # Remove the task from the user's task list
-                    asyncio.create_task(client.send_message(
+                    workdonemsg = asyncio.create_task(client.send_message(
                         chat_id=message.chat.id,
                         text="✅ Your task is completed. You can send a new URL now!"
                     ))
+                    await asyncio.sleep(300)
+                    await workdonemsg.delete()
 
                 task.add_done_callback(task_done_callback)
-                    
+                
                 return #await task  # Wait for the task to finish before proceeding
 
         # for platform, handler in PLATFORM_HANDLERS.items():
