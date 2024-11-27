@@ -13,30 +13,8 @@ from pyrogram import Client, filters
 from pyrogram.types import Message
 import re
 from pyrogram import enums
+
 user_tasks = {}
-
-@Client.on_message(filters.private & filters.command(["spdl"]))
-async def handle_seperate_download(client: Client, message: Message):
-    # Extract the text after the command
-    command_parts = message.text.split(maxsplit=1)  # Split the message into command and arguments
-    if len(command_parts) < 2:
-        await message.reply("⚠️ Please provide a valid URL after the command. Example: `/spdl <url>`")
-        return
-    
-    url = command_parts[1].strip()  # Extract the URL part
-    # Optional: Use regex to validate the URL format
-    url_pattern = re.compile(r'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+')
-    if not url_pattern.match(url):
-        await message.reply("⚠️ The provided text is not a valid URL. Please check and try again.")
-        return
-
-    # Inform the user about the process
-    ok = await message.reply("🔄 Detecting URL type and processing the download...")
-    
-    # Call your download function
-    await youtube_and_other_download_lazy(client, message, url)
-    await ok.edit_text("Thank you for using me ❤")
-
 
 @Client.on_message(filters.private & filters.text & ~filters.command(['start','users','broadcast']))
 async def handle_incoming_message(client: Client, message: Message):
@@ -61,6 +39,7 @@ async def handle_incoming_message(client: Client, message: Message):
             
         user_tasks[user_id].append(task)
         
+        task.add_done_callback(lambda t: asyncio.create_task(task_done_callback(client, message, user_id, t)))
     except Exception as lazyerror:
         print(f"error => {lazyerror}")
 
@@ -92,6 +71,48 @@ async def lazydeveloper_handle_url(client, message, url, user_id):
     except Exception as e:
         # Handle any errors
         await message.reply(f"❌ An error occurred: {e}")
+
+
+@Client.on_message(filters.private & filters.command(["spdl"]))
+async def handle_seperate_download(client: Client, message: Message):
+    # Extract the text after the command
+    command_parts = message.text.split(maxsplit=1)  # Split the message into command and arguments
+    if len(command_parts) < 2:
+        await message.reply("⚠️ Please provide a valid URL after the command. Example: `/spdl <url>`")
+        return
+    
+    url = command_parts[1].strip()  # Extract the URL part
+    # Optional: Use regex to validate the URL format
+    url_pattern = re.compile(r'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+')
+    if not url_pattern.match(url):
+        await message.reply("⚠️ The provided text is not a valid URL. Please check and try again.")
+        return
+
+    # Inform the user about the process
+    ok = await message.reply("🔄 Detecting URL type and processing the download...")
+    
+    # Call your download function
+    await youtube_and_other_download_lazy(client, message, url)
+    await ok.edit_text("Thank you for using me ❤")
+
+async def task_done_callback(client, message, user_id, t):
+    try:
+        if user_id in user_tasks and t in user_tasks[user_id]:
+            user_tasks[user_id].remove(t)
+
+
+        # Notify the user
+        workdonemsg = await client.send_message(
+            chat_id=message.chat.id,
+            text="✅ Your task is completed. You can send a new URL now!"
+        )
+        await asyncio.sleep(300)
+        await workdonemsg.delete()
+    except KeyError:
+        print(f"Task or user ID not found during task cleanup: {t}")
+    except Exception as e:
+        print(f"Error in task_done_callback: {e}")
+
 
 # ============================================================================
 
