@@ -50,14 +50,14 @@ class Bot(Client):
         await self.close()
 
 # Run your bot and web server using Uvicorn
-#async def main():
-    #bot = Bot()
-    # Run the bot asynchronously
-    #bot.run()
+# async def main():
+#     bot = Bot()
+#     # Run the bot asynchronously
+#     await bot.start()
 
-#if __name__ == "__main__":
-    # Run the bot with Uvicorn
-  #  uvicorn.run(main, host="0.0.0.0", port=PORT)
+# if __name__ == "__main__":
+#     # Run the bot with Uvicorn
+#     uvicorn.run(main, host="0.0.0.0", port=PORT)
 
 
 # ==================================================================
