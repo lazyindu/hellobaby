@@ -9,6 +9,7 @@ from pyrogram.types import Message, InputMediaPhoto, InputMediaVideo
 import asyncio
 # Initialize @LazyDeveloperr Instaloader 
 insta = instaloader.Instaloader()
+from pyrogram import enums
 
 async def download_from_lazy_instagram(client, message, url):
     # Extract shortcode from Instagram URL (assuming this is a function you implemented)
@@ -17,6 +18,7 @@ async def download_from_lazy_instagram(client, message, url):
     if not post_shortcode:
         print(f"log:\n\nuser: {message.chat.id}\n\nerror in getting post_shortcode")
         return  # Post shortcode not found, stop processing
+    await client.send_chat_action(message.chat.id, enums.ChatAction.TYPING)
     
     progress_message2 = await message.reply("<i>⚙ ᴘʀᴇᴘᴀʀɪɴɢ ᴛᴏ ꜰᴇᴛᴄʜ ᴄᴀᴘᴛɪᴏɴ...</i>")
     await asyncio.sleep(1)
@@ -34,7 +36,7 @@ async def download_from_lazy_instagram(client, message, url):
         new_caption = new_caption[:-1]  # Trim caption if it's too long
     new_caption = new_caption + caption_trail  # Add bot username at the end
      # Initialize media list
-    
+    await client.send_chat_action(message.chat.id, enums.ChatAction.TYPING)
     progress_message3 = await progress_message2.edit_text("<i>⚡ ᴘʀᴏᴄᴇssɪɴɢ ʏᴏᴜʀ ꜰɪʟᴇ ᴛᴏ ᴜᴘʟᴏᴀᴅ ᴏɴ ᴛᴇʟᴇɢʀᴀᴍ...</i>")
     # await asyncio.sleep(1)
     
@@ -56,16 +58,20 @@ async def download_from_lazy_instagram(client, message, url):
             media_list.append(media)
 
         # Send media group
+        await client.send_chat_action(message.chat.id, enums.ChatAction.UPLOAD_DOCUMENT)
         await client.send_media_group(message.chat.id, media_list)
 
     else:
         # Single media handling
         if post.is_video:
+            await client.send_chat_action(message.chat.id, enums.ChatAction.UPLOAD_VIDEO)
             await client.send_video(message.chat.id, post.video_url, caption=new_caption)
         else:
+            await client.send_chat_action(message.chat.id, enums.ChatAction.UPLOAD_PHOTO)
             await client.send_photo(message.chat.id, post.url, caption=new_caption)
 
     await progress_message3.delete()
+    await client.send_chat_action(message.chat.id, enums.ChatAction.TYPING)
     lazydeveloper = await client.send_message(chat_id=message.chat.id, text=f"❤ ꜰᴇᴇʟ ꜰʀᴇᴇ ᴛᴏ sʜᴀʀᴇ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ꜰʀɪᴇɴᴅ ᴄɪʀᴄʟᴇ...")
     await asyncio.sleep(100)
     await lazydeveloper.delete()

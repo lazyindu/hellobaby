@@ -37,7 +37,7 @@ async def handle_seperate_download(client: Client, message: Message):
     await ok.edit_text("Thank you for using me ❤")
 
 user_tasks = {}
-task_locks={}
+
 async def handle_task_completion(user_id):
     """Wait for all active tasks to complete before allowing new ones."""
     if user_id in user_tasks:
@@ -45,6 +45,30 @@ async def handle_task_completion(user_id):
         if tasks:
             await asyncio.gather(*tasks)  # Wait for all tasks to finish
             user_tasks[user_id] = []  # Clear tasks after completion
+# Your task completion callback function
+async def task_done_callback(client, message, user_id, t):
+    """
+    This function is called once the task is done to remove it from the user's task list
+    and send a completion message.
+    """
+    try:
+        # Remove the task from the user's task list
+        if t in user_tasks[user_id]:
+            user_tasks[user_id].remove(t)
+        
+        # Send a message to inform the user that the task is completed
+        workdonemsg = await client.send_message(
+            chat_id=message.chat.id,
+            text="✅ Your task is completed. You can send a new URL now!"
+        )
+        
+        # Optionally delete the completion message after some time
+        await asyncio.sleep(300)
+        await workdonemsg.delete()
+    
+    except Exception as e:
+        print(f"Error in task_done_callback: {e}")
+
 
 @Client.on_message(filters.private & filters.text & ~filters.command(['start','users','broadcast']))
 async def handle_incoming_message(client: Client, message: Message):
@@ -53,50 +77,43 @@ async def handle_incoming_message(client: Client, message: Message):
         # Extract the message text and user ID
         if user_id not in ADMIN:
             await client.send_message(chat_id=message.chat.id, text=f"Sorry Sweetheart! cant talk to you \nTake permission from my Lover @LazyDeveloperr")
-        
-        # Initialize task list for the user if not already present
-        if user_id not in user_tasks:
-            user_tasks[user_id] = []
-        
-        # Initialize a lock for the user if not already present
-        if user_id not in task_locks:
-            task_locks[user_id] = asyncio.Lock()
 
         # Check if the user already has 3 active tasks
         if len(user_tasks[user_id]) >= 2:
             await message.reply("⏳ You already have 2 active downloads. Please wait for one to finish before adding more.")
             return
-        
+
         url = message.text.strip()
 
         task = asyncio.create_task(lazydeveloper_handle_url(client, message, url, user_id))
-            
-        user_tasks[user_id].append(task)
-        # Use a lock to synchronize the task addition/removal
-        async with task_locks[user_id]:
-            # Add the task to the dictionary to track its completion
-            user_tasks[user_id].append(task)
 
-            # Add the done callback to remove the task after it finishes
-            task.add_done_callback(lambda t: asyncio.create_task(remove_task_from_dict(user_id, t)))
-        
+        # Initialize task list for the user if not already present
+        if user_id not in user_tasks:
+            user_tasks[user_id] = []
+
+        user_tasks[user_id].append(task)
+        # task.add_done_callback(lambda t: user_tasks[user_id].remove(t))
+
+        # Attach the done callback to remove the task and notify the user upon completion
+        task.add_done_callback(lambda t: asyncio.create_task(task_done_callback(client, message, user_id, t)))
+        return
+
         # while not task.done():
         #     await asyncio.sleep(3)  # Sleep for 3 seconds before sending the next action
         #     await message.reply_chat_action(enums.ChatAction.UPLOAD_DOCUMENT)  # Show the 'upload document' action
         
-        
+        # async def task_done_callback(t):
+        #     user_tasks[user_id].remove(t)  # Remove the task from the user's task list
+        #     workdonemsg = asyncio.create_task(client.send_message(
+        #         chat_id=message.chat.id,
+        #         text="✅ Your task is completed. You can send a new URL now!"
+        #     ))
+        #     await asyncio.sleep(300)
+        #     await workdonemsg.delete()
+
     except Exception as lazyerror:
         print(lazyerror)
 
-async def remove_task_from_dict(user_id, task):
-    # This function will be called once the task completes
-    async with task_locks[user_id]:
-        try:
-            # Remove the task from the user's task list once it's completed
-            user_tasks[user_id].remove(task)
-        except ValueError:
-            # In case the task was already removed
-            pass
 
 async def lazydeveloper_handle_url(client, message, url, user_id):
     try:

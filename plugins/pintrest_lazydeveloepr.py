@@ -8,6 +8,7 @@ from urllib import request
 from script import Script
 import requests
 from pyquery import PyQuery as pq
+from pyrogram import enums
 
 logging.basicConfig(format='[%(levelname) 5s/%(asctime)s] %(name)s: %(message)s',
                     level=logging.WARNING)
@@ -39,6 +40,7 @@ async def lazy_get_download_url(link):
 
 async def download_pintrest_vid(client, message, url):
     try:
+        await client.send_chat_action(message.chat.id, enums.ChatAction.TYPING)
         full_url = expand_url(url)
         # print(f"expand url => {full_url}")
         if full_url:
@@ -46,15 +48,19 @@ async def download_pintrest_vid(client, message, url):
             down = await lazy_get_download_url(full_url)
             # print(f"Final link => {down}")
             if '.mp4' in (down):
+                await client.send_chat_action(message.chat.id, enums.ChatAction.UPLOAD_VIDEO)
                 await ms.edit_text("⚡Found video - Sending you video...")
                 await message.reply_video(down)
             elif '.gif' in (down):
+                await client.send_chat_action(message.chat.id, enums.ChatAction.UPLOAD_DOCUMENT)
                 await ms.edit_text("⚡Found GIF - Sending you GIF...")
                 await message.reply_animation(down)
             else:
+                await client.send_chat_action(message.chat.id, enums.ChatAction.UPLOAD_PHOTO)
                 await ms.edit_text("⚡Found Photo - Sending you photo...")
                 await message.reply_photo(down)
             await ms.delete()
+            await client.send_chat_action(message.chat.id, enums.ChatAction.TYPING)
             lazydeveloper = await client.send_message(chat_id=message.chat.id, text=f"❤ ꜰᴇᴇʟ ꜰʀᴇᴇ ᴛᴏ sʜᴀʀᴇ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ꜰʀɪᴇɴᴅ ᴄɪʀᴄʟᴇ...")
             await asyncio.sleep(100)
             await lazydeveloper.delete()
@@ -70,7 +76,7 @@ async def download_pintrest_vid(client, message, url):
 
 
 # =========================================================================
-                        # TIME TO WORK ON THIS
+                        # NO TIME TO WORK ON THIS
 # =========================================================================
 
 
