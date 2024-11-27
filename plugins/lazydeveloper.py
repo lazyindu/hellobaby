@@ -39,7 +39,16 @@ async def handle_incoming_message(client: Client, message: Message):
             
         user_tasks[user_id].append(task)
         
-        task.add_done_callback(lambda t: asyncio.create_task(task_done_callback(client, message, user_id, t)))
+        try:
+            while not task.done():  # Keep checking until the task is done
+                await asyncio.sleep(3)  # Small delay to avoid tight looping
+                
+            # Call the task completion logic once the task is fully done
+            await task_done_callback(client, message, user_id, task)
+
+        except Exception as e:
+            print(f"Error in monitor_task_completion: {e}")
+        # task.add_done_callback(lambda t: asyncio.create_task(task_done_callback(client, message, user_id, t)))
     except Exception as lazyerror:
         print(f"error => {lazyerror}")
 
