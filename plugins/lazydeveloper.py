@@ -33,7 +33,7 @@ async def handle_seperate_download(client: Client, message: Message):
     ok = await message.reply("🔄 Detecting URL type and processing the download...")
     
     # Call your download function
-    await youtube_and_other_download_lazy(client, message, url)
+    await youtube_and_other_download_lazy(client, message, url, ok)
     await ok.edit_text("Thank you for using me ❤")
 
 user_tasks = {}
@@ -45,6 +45,7 @@ async def handle_task_completion(user_id):
         if tasks:
             await asyncio.gather(*tasks)  # Wait for all tasks to finish
             user_tasks[user_id] = []  # Clear tasks after completion
+
 # Your task completion callback function
 async def task_done_callback(client, message, user_id, t):
     """
@@ -70,7 +71,7 @@ async def task_done_callback(client, message, user_id, t):
         print(f"Error in task_done_callback: {e}")
 
 
-@Client.on_message(filters.private & filters.text & ~filters.command(['start','users','broadcast']))
+@Client.on_message(filters.private & filters.text & ~filters.command(['start','users','broadcast','spdl']))
 async def handle_incoming_message(client: Client, message: Message):
     try:
         user_id = message.from_user.id  # Get user ID dynamically

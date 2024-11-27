@@ -101,7 +101,7 @@ async def download_video(url, destination_folder, message, format="video"):
         return False
 
 async def send_video(client, message: Message, info_dict, video_file, destination_folder, progress_message3):
-    await client.send_chat_action(message.chat.id, enums.ChatAction.UPLOAD_VIDEO)
+    # await client.send_chat_action(message.chat.id, enums.ChatAction.UPLOAD_VIDEO)
     basename = video_file.rsplit(".", 1)[-2]
     thumbnail_url = info_dict["thumbnail"]
     video_id = info_dict.get('id', None)
@@ -118,7 +118,7 @@ async def send_video(client, message: Message, info_dict, video_file, destinatio
     width, height, duration = await Mdata01(video_file)
     xlx = await progress_message3.edit_text("⚡ ᴘʀᴏᴄᴇssɪɴɢ ʏᴏᴜʀ ꜰɪʟᴇ ᴛᴏ ᴜᴘʟᴏᴀᴅ ᴏɴ ᴛᴇʟᴇɢʀᴀᴍ...")
     start_time = time.time()
-    await client.send_chat_action(message.chat.id, enums.ChatAction.UPLOAD_VIDEO)
+    # await client.send_chat_action(message.chat.id, enums.ChatAction.UPLOAD_VIDEO)
     await client.send_video(
         message.chat.id,
         video_file,
@@ -137,7 +137,7 @@ async def send_video(client, message: Message, info_dict, video_file, destinatio
         )
     )
     # HANDLING BOT AFTER UPLOAD COMPLETE
-    await client.send_chat_action(message.chat.id, enums.ChatAction.TYPING)
+    # await client.send_chat_action(message.chat.id, enums.ChatAction.TYPING)
     await xlx.edit("✅ Upload completed successfully! 🎉")
     await asyncio.sleep(1)  # Optional: give the user time to see the success message
     await xlx.delete()
@@ -149,7 +149,7 @@ async def send_video(client, message: Message, info_dict, video_file, destinatio
 
 async def download_from_lazy_tiktok_and_x(client, message, url):
     try:
-        await client.send_chat_action(message.chat.id, enums.ChatAction.TYPING)
+        # await client.send_chat_action(message.chat.id, enums.ChatAction.TYPING)
         progress_message2 = await message.reply("<i>⚙ ᴘʀᴇᴘᴀʀɪɴɢ\nᴀɴᴀʟʏsɪɴɢ yᴏᴜʀ ᴜʀʟ...</i>")
         
         TEMP_DOWNLOAD_FOLDER = f"./downloads/{message.from_user.id}/{time.time()}"
@@ -166,7 +166,7 @@ async def download_from_lazy_tiktok_and_x(client, message, url):
         # 'http_chunk_size': 10485760,
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            await client.send_chat_action(message.chat.id, enums.ChatAction.TYPING)
+            # await client.send_chat_action(message.chat.id, enums.ChatAction.TYPING)
             progress_message3 = await progress_message2.edit_text("<i>⚙ fᴇᴛᴄʜɪɴɢ ʀᴇQᴜɪʀᴇᴅ dᴇᴛᴀɪʟs fʀᴏᴍ yᴏᴜʀ lɪɴᴋ...</i>")
             info_dict = ydl.extract_info(url, download=False)
             ydl.process_info(info_dict)
@@ -179,7 +179,7 @@ async def download_from_lazy_tiktok_and_x(client, message, url):
                 print(f"Error in task => {lazy}")
             
             #================= after work done ==============
-            await client.send_chat_action(message.chat.id, enums.ChatAction.TYPING)
+            # await client.send_chat_action(message.chat.id, enums.ChatAction.TYPING)
             lazydeveloper = await client.send_message(chat_id=message.chat.id, text=f"❤ ꜰᴇᴇʟ ꜰʀᴇᴇ ᴛᴏ sʜᴀʀᴇ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ꜰʀɪᴇɴᴅ ᴄɪʀᴄʟᴇ...")
             await asyncio.sleep(100)
             await lazydeveloper.delete()

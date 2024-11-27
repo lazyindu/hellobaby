@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 logging.getLogger("pyrogram").setLevel(logging.WARNING)
 
 
-async def youtube_and_other_download_lazy(bot, update, url):
+async def youtube_and_other_download_lazy(bot, update, url, ok):
     logger.info(update.from_user)
     youtube_dl_username = None
     youtube_dl_password = None
@@ -95,9 +95,10 @@ async def youtube_and_other_download_lazy(bot, update, url):
         command_to_exec.append("--password")
         command_to_exec.append(youtube_dl_password)
     logger.info(command_to_exec)
+    await ok.delete()
     chk = await bot.send_message(
         chat_id=update.chat.id,
-        text="Proccesing your ⌛",
+        text="Proccesing your request ⌛",
         disable_web_page_preview=True,
         reply_to_message_id=update.id,
     )
@@ -166,7 +167,7 @@ async def youtube_and_other_download_lazy(bot, update, url):
         response_json = json.loads(x_reponse)
         randem = random_char(5)
         save_ytdl_json_path = (
-            DOWNLOAD_LOCATION
+            SPDL_LOCATION
             + "/"
             + str(update.from_user.id)
             + f"{randem}"
