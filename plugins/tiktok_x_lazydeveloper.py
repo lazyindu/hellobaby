@@ -126,8 +126,8 @@ async def send_video(client, message: Message, info_dict, video_file, destinatio
         width=width,
         height=height,
         parse_mode=enums.ParseMode.HTML,
-        disable_webpage_preview=True,  # Disable preview for the link
         thumb=thumb,
+        supports_streaming=True,
         progress=progress_for_pyrogram,
         progress_args=(
             f"<blockquote>🍟ᴜᴘʟᴏᴀᴅ ʏᴏᴜʀ ᴠɪᴅᴇᴏ... 📤</blockquote>============x============<blockquote>{caption}</blockquote>",
@@ -149,7 +149,7 @@ async def download_from_lazy_tiktok_and_x(client, message, url):
         if not os.path.exists(TEMP_DOWNLOAD_FOLDER):
             os.makedirs(TEMP_DOWNLOAD_FOLDER)
         # Using the temporary download folder
-        destination_folder = TEMP_DOWNLOAD_FOLDER  
+        destination_folder = TEMP_DOWNLOAD_FOLDER
         # try:
         ydl_opts = {
         "format": "best[ext=mp4]",
